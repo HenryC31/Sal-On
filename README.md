@@ -29,7 +29,6 @@ El repositorio está organizado en un monorepo que separa el cliente del servido
     - Git
 
 
-
 🚀 Instalación y Uso
 Para trabajar en el proyecto localmente, sigue estos pasos:
 
@@ -40,27 +39,27 @@ cd Sal-On
 Instalar dependencias:
 Debes instalar las dependencias en cada carpeta, ya que cada servicio es independiente:
 
-   # Frontend
+   Frontend
    cd frontend && npm install && cd ..
-   # Gateway
+   Gateway
    cd backend/gateway && npm install && cd ..
-   # Servicio Catálogo
+   Servicio Catálogo
    cd backend/service-catalogo && npm install && cd ..
-   # Servicio Reservas
+   Servicio Reservas
    cd backend/service-reservas && npm install && cd ..
 Ejecución:
 Para que el sistema funcione completo, debes iniciar cada servicio en una terminal diferente:
 
-# Gateway:
+Gateway:
 node backend/gateway/index.js (Puerto 3000)
 
-# Catálogo: 
+Catálogo: 
 node backend/service-catalogo/index.js (Puerto 3001)
 
-# Reservas:
+Reservas:
 node backend/service-reservas/index.js (Puerto 3002)
 
-# React App:
+React App:
 npm start (dentro de la carpeta frontend)
 
 🛡️ Notas de Seguridad
