@@ -1,13 +1,74 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root {
+  --primary-purple: #a855f7;
+  --light-purple: #b685ff;
+  --text-color: #333;
+  --bg-color: #f9f9f9;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.salon-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+  width: 300px;
+}
+
+.salon-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-image-placeholder {
+  background-color: #f0f0f0;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #999;
+}
+
+.card-info {
+  padding: 20px;
+}
+
+.salon-name {
+  color: #7c3aed;
+  margin: 0 0 10px 0;
+  font-size: 1.2rem;
+}
+
+.salon-location, .salon-stats {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.salon-price {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin: 15px 0;
+}
+
+.btn-reserve {
+  background-color: #a855f7;
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 12px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
 }

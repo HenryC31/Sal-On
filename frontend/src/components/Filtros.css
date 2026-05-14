@@ -1,0 +1,96 @@
+.filtros-wrapper {
+  margin: 0 auto 30px auto;
+  max-width: 900px; /* Hace que la barra sea más pequeña y centrada */
+  padding: 20px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.filtros-bar {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filtro-item label {
+  font-size: 0.85rem;
+  color: #a855f7;
+  font-weight: bold;
+}
+
+.filtro-input {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  outline: none;
+  color: #555;
+  font-family: inherit;
+}
+
+.num-input {
+  width: 90px;
+}
+
+.rango-container {
+  width: 200px;
+}
+
+.precio-dinamico {
+  color: #333;
+}
+
+.rango-slider {
+  accent-color: #a855f7;
+  width: 100%;
+}
+
+.btn-buscar {
+  background: #a855f7;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  height: 40px;
+  transition: background 0.3s;
+}
+
+.btn-buscar:hover {
+  background: #9333ea;
+}
+
+.amenidades-bar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.custom-checkbox {
+  accent-color: #a855f7;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
