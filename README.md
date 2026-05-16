@@ -20,6 +20,7 @@ El repositorio está organizado en un monorepo que separa el cliente del servido
 
 /backend/service-reservas: Microservicio especializado en la lógica de reservaciones y disponibilidad de fechas.
 
+/backend/service-usuarios: Microservicio encargado de la gestión del Inicio de Sesión y Registro de usuarios, tanto de clientes, como de anfitriones.
 -------------------------------------------------------------------------------
 
 🛠️ Requisitos Previos
@@ -35,9 +36,10 @@ Git
 Para trabajar en el proyecto localmente, sigue estos pasos:
 
 1. Clonar el repositorio:
-Bash
+
 git clone https://github.com/HenryC31/Sal-On.git
 cd Sal-On
+
 2. Instalar dependencias:
 Debes instalar las dependencias en cada carpeta, ya que cada servicio es independiente:
 
@@ -54,6 +56,8 @@ cd backend/service-catalogo && npm install && cd ..
 Servicio Reservas:
 cd backend/service-reservas && npm install && cd ..
 
+Servicio Usuarios
+cd backend/service-usuarios && npm install && cd ..
 -------------------------------------------------------------------------------
 
 ⚡ Ejecución
@@ -70,6 +74,10 @@ node backend/service-catalogo/index.js
 Reservas:
 node backend/service-reservas/index.js 
 (Puerto 3002)
+
+Usuarios:
+node backend/service-usuarios/index.js 
+(Puerto 3003)
 
 React App (Vite):
 cd frontend

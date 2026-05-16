@@ -9,7 +9,7 @@ app.use(express.json());
 
 const PORT = 3000;
 
-// Rutas "Distribuidas"
+// Rutas Distribuidas
 // Cuando el front pida /salones, el gateway le pregunta al microservicio de catálogo
 app.get('/api/salones', async (req, res) => {
     try {
@@ -28,6 +28,37 @@ app.post('/api/reservar', async (req, res) => {
     } catch (error) {
         res.status(500).send("Error conectando al servicio de reservas");
     }
+});
+
+// Cuando el front pida /usuarios, el gateway le pregunta al microservicio de usuarios
+app.use('/api/usuarios', async (req, res) => {
+  try {
+    // Redirigimos la petición tal cual viene del Frontend hacia el microservicio
+    const response = await axios({
+      method: req.method,
+      url: `http://localhost:3003${req.url}`,
+      data: req.body,
+      headers: req.headers
+    });
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en el Gateway al contactar usuarios' });
+  }
+});
+
+// Cuando el front pida /reservas, el gateway le pregunta al microservicio de reservas
+app.use('/api/reservas', async (req, res) => {
+  try {
+    const response = await axios({
+      method: req.method,
+      url: `http://localhost:3002${req.url}`,
+      data: req.body,
+      headers: req.headers
+    });
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en el Gateway al contactar reservas' });
+  }
 });
 
 app.listen(PORT, () => {

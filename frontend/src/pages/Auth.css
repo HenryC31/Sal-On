@@ -1,0 +1,132 @@
+.auth-container {
+  min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Aquí va el fondo de piñatas */
+  background-color: #f3e8ff; 
+  background-image: url('/pinatas-pattern.png');
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-title {
+  color: #a855f7;
+  margin-bottom: 10px;
+  margin-top: 0;
+  font-size: 1.8rem;
+}
+
+.auth-subtitle {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 0.95rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.input-group input {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  transition: border 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #a855f7;
+}
+
+.btn-auth {
+  background: #a855f7;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.btn-auth:hover {
+  background: #9333ea;
+}
+
+.auth-footer {
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.auth-link {
+  color: #a855f7;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.role-selector {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 12px 10px;
+  border: 2px solid #eee;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #888;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.role-btn:hover {
+  border-color: #d8b4fe;
+}
+
+/* Esta es la clase que se activa cuando le dan clic */
+.role-btn.active {
+  border-color: #a855f7;
+  background: #f3e8ff;
+  color: #a855f7;
+}

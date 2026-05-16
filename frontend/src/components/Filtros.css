@@ -94,3 +94,19 @@
   height: 16px;
   cursor: pointer;
 }
+
+.btn-limpiar {
+  background: white;
+  color: #a855f7;
+  border: 2px solid #a855f7;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  height: 40px;
+  transition: all 0.3s;
+}
+
+.btn-limpiar:hover {
+  background: #f3e8ff;
+}

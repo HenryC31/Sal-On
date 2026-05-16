@@ -5,7 +5,8 @@ import SalonCard from '../components/SalonCard';
 
 const Home = () => {
   const [salones, setSalones] = useState([]);
-  const [busqueda, setBusqueda] = useState(''); // <-- Estado para tu barra de texto
+  const [busqueda, setBusqueda] = useState(''); 
+
 
   useEffect(() => {
     const fetchSalones = async () => {
@@ -16,20 +17,47 @@ const Home = () => {
         console.error("Error trayendo los salones:", error);
       }
     };
-
     fetchSalones();
   }, []);
 
-  // Magia pura: Filtramos el arreglo en tiempo real según lo que escribas
-  const salonesFiltrados = salones.filter(salon => 
-    salon.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const [filtrosActivos, setFiltrosActivos] = useState({
+    precioMax: 20000,
+    personasMin: 0,
+    fecha: '',
+    amenidades: [] // Agregamos este valor inicial
+  });
+
+  const aplicarFiltros = (nuevosFiltros) => {
+    setFiltrosActivos(nuevosFiltros);
+  };
+
+const salonesFiltrados = salones.filter(salon => {
+    // 1. Filtro de búsqueda por texto
+    const cumpleBusqueda = salon.nombre.toLowerCase().includes(busqueda.toLowerCase());
+    
+    // 2. Filtro de precio (forzando números)
+    const precioSalon = Number(salon.precio_evento) || 0;
+    const precioMax = Number(filtrosActivos.precioMax) || 20000;
+    const cumplePrecio = precioSalon <= precioMax;
+    
+    // 3. Filtro de personas (forzando números para evitar bugs)
+    const capacidadSalon = Number(salon.capacidad) || 0;
+    const personasBuscadas = Number(filtrosActivos.personasMin) || 0;
+    const cumplePersonas = capacidadSalon >= personasBuscadas;
+    
+    // 4. Filtro de amenidades
+    const cumpleAmenidades = filtrosActivos.amenidades.length === 0 || 
+      filtrosActivos.amenidades.every(amenidad => salon.amenidades && salon.amenidades.includes(amenidad));
+
+    return cumpleBusqueda && cumplePrecio && cumplePersonas && cumpleAmenidades;
+  });
+
 
   return (
     <div className="container">
-      <Filtros />
+      {/* Le pasamos la función a Filtros por medio del prop onBuscar */}
+      <Filtros onBuscar={aplicarFiltros} />
       
-      {/* Encabezado y Barra de Búsqueda juntos */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
         <h2 style={{ color: '#8A2BE2', margin: 0 }}>Salones disponibles</h2>
         
@@ -51,20 +79,14 @@ const Home = () => {
         />
       </div>
     
-      <div style={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        justifyContent: 'center',
-        gap: '30px', 
-        marginTop: '20px' 
-      }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '30px', marginTop: '20px' }}>
         {salonesFiltrados.length > 0 ? (
           salonesFiltrados.map((salon) => (
             <SalonCard key={salon.id} salon={salon} />
           ))
         ) : (
           <p style={{ color: '#666', marginTop: '20px' }}>
-            No se encontraron salones que coincidan con tu búsqueda.
+            No se encontraron salones con esos requisitos. 😢
           </p>
         )}
       </div>

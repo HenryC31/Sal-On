@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Importamos el hook
 
 const SalonCard = ({ salon }) => {
+  const navigate = useNavigate(); // Inicializamos la navegación
+
   return (
     <div className="salon-card">
       <div className="card-image-placeholder">
-        {/* Aquí irá la imagen real después */}
         <span>Foto del salón</span>
       </div>
       
@@ -16,8 +18,13 @@ const SalonCard = ({ salon }) => {
           <span className="salon-rating">⭐⭐⭐⭐⭐</span>
         </div>
         <p className="salon-price">${salon.precio_evento} MXN / evento</p>
-        
-        <button className="btn-reserve">Reservar</button>
+    
+        <button 
+          className="btn-reserve" 
+          onClick={() => navigate(`/salon/${salon.id}`)}
+        >
+          Ver detalles
+        </button>
       </div>
     </div>
   );
