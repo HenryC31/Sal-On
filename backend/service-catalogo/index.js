@@ -25,6 +25,35 @@ app.get('/salones', async (req, res) => {
     }
 });
 
+// Crear un nuevo salón (Para arrendadores)
+app.post('/', async (req, res) => {
+  try {
+    const { nombre, direccion, descripcion, capacidad_max, precio_evento, amenidades, anfitrion_id, imagenes } = req.body;
+    const { data, error } = await supabase
+      .from('salones')
+      .insert([
+        { 
+          nombre, 
+          direccion, 
+          descripcion, 
+          capacidad_max, 
+          precio_evento, 
+          amenidades,
+          anfitrion_id,
+          imagenes
+        }
+      ])
+      .select();
+
+    if (error) throw error;
+
+    res.status(201).json({ mensaje: '¡Salón registrado con éxito!', salon: data[0] });
+  } catch (err) {
+    console.error("Error al crear salón:", err);
+    res.status(500).json({ error: 'No se pudo registrar el salón en el catálogo.' });
+  }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`Microservicio de Catálogo corriendo en http://localhost:${PORT}`);

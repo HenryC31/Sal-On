@@ -175,7 +175,7 @@ return (
         <div className="detalle-descripcion">
           <h3>Acerca de este lugar</h3>
           <p>{salon.descripcion}</p>
-          <p><strong>Capacidad máxima:</strong> {salon.capacidad} personas.</p>
+          <p><strong>Capacidad máxima:</strong> {salon.capacidad_max} personas.</p>
         </div>
 
         <h3>Amenidades incluidas</h3>

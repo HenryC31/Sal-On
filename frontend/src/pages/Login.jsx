@@ -28,8 +28,13 @@ const Login = ({ onLoginSuccess }) => {
         
         localStorage.setItem('salonUser', JSON.stringify(respuesta.data.usuario));
         onLoginSuccess(respuesta.data.usuario);
-
-        navigate('/');
+        const rolUsuario = respuesta.data.usuario.rol;
+        
+        if (rolUsuario === 'arrendador' || rolUsuario === 'admin') {
+          navigate('/panel-anfitrion');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);

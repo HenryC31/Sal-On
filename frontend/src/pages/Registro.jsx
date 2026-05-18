@@ -30,7 +30,7 @@ const Registro = () => {
         Swal.fire({
           icon: 'success',
           title: '¡Registro Exitoso!',
-          text: 'Tu cuenta ha sido. Ya puedes iniciar sesión.',
+          text: 'Tu cuenta ha sido creada. Ya puedes iniciar sesión.',
           confirmButtonColor: '#a855f7'
         }).then(() => {
           navigate('/login'); 
@@ -69,8 +69,8 @@ const Registro = () => {
               </button>
               <button 
                 type="button" 
-                className={`role-btn ${rol === 'anfitrion' ? 'active' : ''}`}
-                onClick={() => setRol('anfitrion')}
+                className={`role-btn ${rol === 'arrendador' ? 'active' : ''}`}
+                onClick={() => setRol('arrendador')}
               >
                 🏢 Soy Anfitrión
               </button>

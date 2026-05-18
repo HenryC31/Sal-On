@@ -21,16 +21,6 @@ app.get('/api/salones', async (req, res) => {
     }
 });
 
-// Cuando el front pida /reservar, el gateway le pregunta al microservicio de reservas
-app.post('/api/reservar', async (req, res) => {
-    try {
-        const response = await axios.post('http://localhost:3002/reservar', req.body);
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).send("Error conectando al servicio de reservas");
-    }
-});
-
 // Cuando el front pida /usuarios, el gateway le pregunta al microservicio de usuarios
 app.use('/api/usuarios', async (req, res) => {
   try {

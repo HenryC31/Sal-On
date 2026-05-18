@@ -7,6 +7,7 @@ import Registro from './pages/Registro';
 import SalonDetalle from './pages/SalonDetalle';
 import Perfil from './pages/Perfil'; 
 import RutaProtegida from './components/RutaProtegida';
+import Anfitrion from './pages/Anfitrion';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -34,6 +35,7 @@ function App() {
           <Route element={<RutaProtegida />}>
             <Route path="/salon/:id" element={<SalonDetalle />} />
             <Route path="/perfil" element={<Perfil onUserUpdate={setUser} />} /> 
+            <Route path="/panel-anfitrion" element={<Anfitrion />} /> 
           </Route>
         </Routes>
       </div>

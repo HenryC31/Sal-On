@@ -32,20 +32,20 @@ const Home = () => {
   };
 
 const salonesFiltrados = salones.filter(salon => {
-    // 1. Filtro de búsqueda por texto
+    // Filtro de búsqueda por texto
     const cumpleBusqueda = salon.nombre.toLowerCase().includes(busqueda.toLowerCase());
     
-    // 2. Filtro de precio (forzando números)
+    // Filtro de precio (forzando números)
     const precioSalon = Number(salon.precio_evento) || 0;
     const precioMax = Number(filtrosActivos.precioMax) || 20000;
     const cumplePrecio = precioSalon <= precioMax;
     
-    // 3. Filtro de personas (forzando números para evitar bugs)
-    const capacidadSalon = Number(salon.capacidad) || 0;
+    // Filtro de personas
+    const capacidadSalon = Number(salon.capacidad_max) || 0;
     const personasBuscadas = Number(filtrosActivos.personasMin) || 0;
     const cumplePersonas = capacidadSalon >= personasBuscadas;
     
-    // 4. Filtro de amenidades
+    // Filtro de amenidades
     const cumpleAmenidades = filtrosActivos.amenidades.length === 0 || 
       filtrosActivos.amenidades.every(amenidad => salon.amenidades && salon.amenidades.includes(amenidad));
 
