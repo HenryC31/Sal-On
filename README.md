@@ -11,18 +11,31 @@ El repositorio está organizado en un monorepo que separa el cliente del servido
 
 Frontend
 -------------------------------------------------------------------------------
-/frontend: Aplicación de cliente desarrollada en React + Vite. Se encarga de la interfaz de usuario, gestión de estados y la comunicación eficiente con el API Gateway.
+/frontend: 
+
+Aplicación de cliente desarrollada en React + Vite. Se encarga de la interfaz de usuario, gestión de estados y la comunicación eficiente con el API Gateway.
 
 
 Backend (Arquitectura Distribuida)
 -------------------------------------------------------------------------------
-/backend/gateway: El "Entry Point" del sistema. Actúa como un proxy reverso que recibe las peticiones del frontend y las redirige al microservicio correspondiente.
+/backend/gateway: 
 
-/backend/service-catalogo: Microservicio encargado de la gestión y consulta de salones disponibles. Maneja su propio nodo de datos conectado a Supabase.
+El "Entry Point" del sistema. Actúa como un proxy reverso que recibe las peticiones del frontend y las redirige al microservicio correspondiente.
 
-/backend/service-reservas: Microservicio especializado en la lógica de reservaciones y disponibilidad de fechas.
 
-/backend/service-usuarios: Microservicio encargado de la gestión del Inicio de Sesión y Registro de usuarios, tanto de clientes, como de anfitriones.
+/backend/service-catalogo: 
+
+Microservicio encargado de la gestión y consulta de salones disponibles. Maneja su propio nodo de datos conectado a Supabase.
+
+
+/backend/service-reservas: 
+
+Microservicio especializado en la lógica de reservaciones y disponibilidad de fechas.
+
+
+/backend/service-usuarios: 
+
+Microservicio encargado de la gestión del Inicio de Sesión y Registro de usuarios, tanto de clientes, como de anfitriones.
 
 
 Requisitos Previos
@@ -48,52 +61,37 @@ Debes instalar las dependencias en cada carpeta, ya que cada servicio es indepen
 
 Frontend:
 
-cd frontend && npm install && cd ..
+cd frontend && 
 
-Gateway:
+npm install && 
 
-cd backend/gateway && npm install && cd ..
+cd ..
 
-Servicio Catálogo:
+Backend:
 
-cd backend/service-catalogo && npm install && cd ..
+cd backend &&
 
-Servicio Reservas:
+npm run install:all
 
-cd backend/service-reservas && npm install && cd ..
 
-Servicio Usuarios
-
-cd backend/service-usuarios && npm install && cd ..
+Nota:
+Esto último ejecutará un script para instalar las dependencias dentro de cada micro servicio
 
 
 Ejecución
 -------------------------------------------------------------------------------
-Para que el sistema funcione completo, debes iniciar cada servicio en una terminal diferente:
+Para que el sistema funcione completo, se debe iniciar cada micro servicio. Para simplificar las cosas, hice un script para correr todos los servicios en una misma terminal.
 
-Gateway:
 
-node backend/gateway/index.js 
-(Puerto 3000)
+Backend:
 
-Catálogo:
+cd backend &&
+npm start
 
-node backend/service-catalogo/index.js 
-(Puerto 3001)
-
-Reservas:
-
-node backend/service-reservas/index.js 
-(Puerto 3002)
-
-Usuarios:
-
-node backend/service-usuarios/index.js 
-(Puerto 3003)
 
 React App (Vite):
 
-cd frontend | 
+cd frontend && 
 npm run dev
 (Puerto 5173 por defecto)
 

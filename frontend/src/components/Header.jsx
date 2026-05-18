@@ -21,8 +21,17 @@ const Header = ({ user, onLogout }) => {
             <div className="user-profile-container">
               {/* Foto de perfil generada en vivo con el nombre del usuario logueado */}
               <img 
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.nombre_completo)}&background=fff&color=a855f7&rounded=true`} 
-                alt="Perfil" 
+                src={user.foto_url || `https://ui-avatars.com/api/?name=${user.nombre_completo?.replace(' ', '+')}&background=fff&color=a855f7&rounded=true`} 
+                alt="Avatar de usuario"
+                style={{ 
+                  width: '45px', 
+                  height: '45px', 
+                  borderRadius: '50%', 
+                  objectFit: 'cover', 
+                  border: '2px solid white',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                  cursor: 'pointer'
+                }}
                 className="profile-pic"
                 onClick={() => setMenuAbierto(!menuAbierto)}
               />

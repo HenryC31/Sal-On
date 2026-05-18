@@ -1,7 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 app.use(cors());
@@ -33,7 +34,6 @@ app.post('/api/reservar', async (req, res) => {
 // Cuando el front pida /usuarios, el gateway le pregunta al microservicio de usuarios
 app.use('/api/usuarios', async (req, res) => {
   try {
-    // Redirigimos la petición tal cual viene del Frontend hacia el microservicio
     const response = await axios({
       method: req.method,
       url: `http://localhost:3003${req.url}`,
@@ -42,7 +42,7 @@ app.use('/api/usuarios', async (req, res) => {
     });
     res.status(response.status).json(response.data);
   } catch (error) {
-    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en el Gateway al contactar usuarios' });
+    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en Gateway Usuarios' });
   }
 });
 
@@ -57,7 +57,7 @@ app.use('/api/reservas', async (req, res) => {
     });
     res.status(response.status).json(response.data);
   } catch (error) {
-    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en el Gateway al contactar reservas' });
+    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en Gateway Reservas' });
   }
 });
 

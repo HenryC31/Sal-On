@@ -5,8 +5,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Registro from './pages/Registro';
 import SalonDetalle from './pages/SalonDetalle';
-import Perfil from './pages/Perfil'; // <-- Importamos la nueva vista
-import RutaProtegida from './components/RutaProtegida'; // <-- Importamos el escudo
+import Perfil from './pages/Perfil'; 
+import RutaProtegida from './components/RutaProtegida';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -33,7 +33,7 @@ function App() {
           {/* RUTAS PROTEGIDAS */}
           <Route element={<RutaProtegida />}>
             <Route path="/salon/:id" element={<SalonDetalle />} />
-            <Route path="/perfil" element={<Perfil />} /> {/* <-- Protegida al 100% */}
+            <Route path="/perfil" element={<Perfil onUserUpdate={setUser} />} /> 
           </Route>
         </Routes>
       </div>

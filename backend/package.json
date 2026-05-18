@@ -1,0 +1,13 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "API Gateway y Microservicios de Sal-ON",
+  "main": "index.js",
+"scripts": {
+    "start": "concurrently -n \"GATEWAY,USUARIOS,RESERVAS,CATALOGO\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold,bgYellow.bold\" \"node gateway/index.js\" \"node service-usuarios/index.js\" \"node service-reservas/index.js\" \"node service-catalogo/index.js\"",
+    "install:all": "npm install && npm install --prefix gateway && npm install --prefix service-usuarios && npm install --prefix service-reservas && npm install --prefix service-catalogo"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

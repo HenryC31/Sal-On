@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -86,6 +87,31 @@ app.post('/login', async (req, res) => {
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// Actualizar datos del perfil
+app.put('/actualizar', async (req, res) => {
+  try {
+    const { id, correo, telefono, foto_url } = req.body;
+
+    const { data, error } = await supabase
+      .from('usuarios')
+      .update({ correo, telefono, foto_url })
+      .eq('id', id) // Buscamos al usuario por su ID único
+      .select() // Para que nos regrese el usuario actualizado
+      .single(); // single() porque solo actualizamos un usuario
+
+    if (error) {
+      if (error.code === '23505') return res.status(400).json({ error: 'El correo ya está en uso.' });
+      throw error;
+    }
+
+    delete data.password_hash; // Por seguridad, no mandamos el hash de vuelta al Front
+    res.status(200).json({ mensaje: 'Perfil actualizado', usuario: data });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al actualizar perfil' });
   }
 });
 

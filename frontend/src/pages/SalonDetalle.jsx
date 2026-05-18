@@ -39,23 +39,17 @@ const SalonDetalle = () => {
   const prevImg = () => setImgIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
 
 const handleReservar = async () => {
-    // Extraemos el string del local storage
     const usuarioString = localStorage.getItem('salonUser');
-    
-    // Validamos si no hay sesión
     if (!usuarioString) {
       Swal.fire({
         icon: 'warning',
         title: '¡Alto ahí!',
         text: 'Necesitas iniciar sesión para poder apartar una fecha.',
         confirmButtonColor: '#a855f7'
-      }).then(() => {
-        navigate('/login');
-      });
+      }).then(() => navigate('/login'));
       return;
     }
 
-    // Validamos si no puso fecha
     if (!fecha) {
       Swal.fire({
         icon: 'error',
@@ -66,48 +60,85 @@ const handleReservar = async () => {
       return;
     }
 
-    // Convertimos el string a un objeto de JavaScript para sacar el ID
     const usuarioLogueado = JSON.parse(usuarioString);
 
     try {
-      // Mostramos una alerta bonita de "Cargando" mientras el microservicio hace lo suyo
-      Swal.fire({
-        title: 'Procesando reservación...',
-        text: 'Estamos validando la disponibilidad de tu fecha.',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
+      Swal.fire({ title: 'Bloqueando fecha...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-      // Conectamos al API Gateway con los datos estructurados
       const respuesta = await axios.post('http://localhost:3000/api/reservas', {
         salon_id: salon.id,
-        cliente_id: usuarioLogueado.id, // Sacamos el ID del usuario de la sesión
+        cliente_id: usuarioLogueado.id,
         fecha_evento: fecha,
         monto_total: salon.precio_evento
       });
 
-      // Si el backend nos responde 201 es que todo salió bien y mostramos la alerta de éxito
       if (respuesta.status === 201) {
-        Swal.fire({
-          icon: 'success',
-          title: '¡Reservación Exitosa!',
-          text: `Ya quedó apartado el salón para el ${fecha}. ¡A mandar las invitaciones!`,
-          confirmButtonColor: '#a855f7'
-        }).then(() => {
-          navigate('/'); // Lo regresamos al Home
+        const idReserva = respuesta.data.reserva_id;
+
+        const { isConfirmed } = await Swal.fire({
+          title: '💳 Pasarela de Pagos',
+          html: `
+            <div style="text-align: left; margin-bottom: 15px;">
+              <p>Total a pagar: <strong style="font-size: 1.2rem; color: #10b981;">$${salon.precio_evento.toLocaleString('es-MX')} MXN</strong></p>
+            </div>
+            <input id="swal-tarjeta" class="swal2-input" placeholder="Número de Tarjeta (16 dígitos)" type="text" maxlength="16" style="margin-bottom: 10px; width: 85%;">
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <input id="swal-fecha" class="swal2-input" placeholder="MM/AA" type="text" maxlength="5" style="width: 40%; margin: 0;">
+              <input id="swal-cvv" class="swal2-input" placeholder="CVV" type="password" maxlength="3" style="width: 40%; margin: 0;">
+            </div>
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: 'Pagar ahora',
+          cancelButtonText: 'Pagar después',
+          confirmButtonColor: '#10b981', // Verde para transmitir seguridad
+          cancelButtonColor: '#6b7280',
+          preConfirm: () => {
+            const tarjeta = document.getElementById('swal-tarjeta').value;
+            if (!tarjeta || tarjeta.length < 16) {
+              Swal.showValidationMessage('Por favor ingresa una tarjeta válida de 16 dígitos');
+              return false;
+            }
+            return true;
+          }
         });
+
+        // 3. Evaluar qué decidió el usuario
+        if (isConfirmed) {
+          // Simulamos el tiempo que tarda el banco en responder (2 segundos)
+          Swal.fire({ 
+            title: 'Procesando pago...', 
+            text: 'Conectando con el banco, no cierres esta ventana',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading() 
+          });
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await axios.patch(`http://localhost:3000/api/reservas/${idReserva}/pagar`);
+
+          Swal.fire({
+            icon: 'success',
+            title: '¡Pago Aprobado!',
+            text: 'Tu recibo ha sido generado y la fecha está 100% confirmada.',
+            confirmButtonColor: '#a855f7'
+          }).then(() => navigate('/perfil'));
+
+        } else {
+          // Si le dio a "Cancelar" o cerró el modal, se queda como 'pendiente'
+          Swal.fire({
+            icon: 'info',
+            title: 'Reserva Pendiente',
+            text: 'La fecha está apartada. Tienes 24 horas para realizar el pago desde tu Perfil antes de que se libere el salón.',
+            confirmButtonColor: '#a855f7'
+          }).then(() => navigate('/perfil'));
+        }
       }
-      
     } catch (error) {
       console.error("Error al reservar:", error);
-      
-      // Si la fecha ya estaba ocupada, el backend mandará error 400 y lo atrapamos aquí
       Swal.fire({
         icon: 'error',
         title: 'Fecha no disponible',
-        text: error.response?.data?.error || 'Hubo un problema al procesar la reserva. Intenta de nuevo.',
+        text: error.response?.data?.error || 'Hubo un problema al procesar la reserva.',
         confirmButtonColor: '#a855f7'
       });
     }

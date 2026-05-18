@@ -1,0 +1,218 @@
+.perfil-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.perfil-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+  border-left: 5px solid #a855f7;
+}
+
+.perfil-layout {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.perfil-avatar-seccion {
+  flex: 0 0 120px;
+}
+
+.perfil-foto-grande {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #f3e8ff;
+  box-shadow: 0 4px 10px rgba(168, 85, 247, 0.2);
+}
+
+.perfil-info h2 {
+  color: #1e1b4b;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.perfil-info p {
+  color: #6b7280;
+  margin: 5px 0;
+}
+
+.badge-rol {
+  background: #f3e8ff;
+  color: #a855f7;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.btn-editar-perfil {
+  background-color: #a855f7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.2s;
+}
+
+.btn-editar-perfil:hover {
+  background-color: #9333ea;
+}
+
+.reservas-seccion h3 {
+  color: #1e1b4b;
+  margin-bottom: 20px;
+}
+
+.tabla-contenedor {
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.tabla-reservas {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tabla-reservas th {
+  background-color: #f9fafb;
+  color: #4b5563;
+  padding: 14px;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tabla-reservas td {
+  padding: 14px;
+  border-bottom: 1px solid #edf2f7;
+  color: #374151;
+}
+
+.estado-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.estado-badge.pendiente {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.estado-badge.pagada {
+  background-color: #d1fae5;
+  color: #059669;
+}
+
+.estado-badge.cancelada {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-cancelar {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+  background-color: #dc2626;
+  color: white;
+}
+
+.no-reservas {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Formulario de edición */
+.form-editar-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-editar-perfil h3 {
+  margin: 0 0 5px 0;
+  color: #1e1b4b;
+}
+
+.campo-edicion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.campo-edicion label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.campo-edicion input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+}
+
+.campo-edicion input:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+}
+
+.botones-edicion {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-cancelar-edicion {
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-guardar-edicion {
+  background: #a855f7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-guardar-edicion:hover {
+  background: #9333ea;
+}
