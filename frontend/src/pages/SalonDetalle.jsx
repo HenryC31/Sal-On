@@ -10,8 +10,6 @@ const SalonDetalle = () => {
   
   const [salon, setSalon] = useState(null);
   const [fecha, setFecha] = useState('');
-  
-  // --- NUEVO: Estado para el carrusel ---
   const [imgIndex, setImgIndex] = useState(0);
 
   useEffect(() => {
@@ -68,6 +66,7 @@ const handleReservar = async () => {
       const respuesta = await axios.post('http://localhost:3000/api/reservas', {
         salon_id: salon.id,
         cliente_id: usuarioLogueado.id,
+        salon_nombre: salon.nombre,
         fecha_evento: fecha,
         monto_total: salon.precio_evento
       });

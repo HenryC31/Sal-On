@@ -7,7 +7,7 @@ const Filtros = ({ onBuscar }) => {
   const [fecha, setFecha] = useState('');
   const [amenidadesSel, setAmenidadesSel] = useState([]);
 
-  const amenidadesLista = ['Aire libre', 'Alberca', 'Aire acondicionado', 'Asador', 'Area de juegos'];
+  const amenidadesLista = ['Aire libre', 'Alberca', 'Aire acondicionado', 'Asador', 'Área de juegos'];
 
   const handleCheckbox = (amenidad) => {
     if (amenidadesSel.includes(amenidad)) {

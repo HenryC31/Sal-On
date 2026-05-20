@@ -51,6 +51,27 @@ app.use('/api/reservas', async (req, res) => {
   }
 });
 
+// Cuando el front envíe un POST a /salones, el gateway lo manda al microservicio de catálogo
+app.post('/api/salones', async (req, res) => {
+    try {
+        const response = await axios.post('http://localhost:3001/', req.body);
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error creando salón en el catálogo' });
+    }
+});
+
+// Cuando el front envíe un PUT a /salones/:id, el gateway lo manda al catálogo
+app.put('/api/salones/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const response = await axios.put(`http://localhost:3001/${id}`, req.body);
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error actualizando el salón' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Gateway corriendo en http://localhost:${PORT}`);
 });

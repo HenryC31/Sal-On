@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import './Header.css';
 
 const Header = ({ user, onLogout }) => {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const navigate = useNavigate();
 
   return (
     <header className="main-header">
@@ -21,23 +19,6 @@ const Header = ({ user, onLogout }) => {
         <nav className="header-nav">
           {user ? (
             <div className="user-profile-container">
-              {(user.rol === 'arrendador' || user.rol === 'admin') && (
-                <button 
-                  onClick={() => navigate('/panel-anfitrion')} 
-                  style={{ 
-                    backgroundColor: '#a855f7', 
-                    color: 'white', 
-                    border: 'none', 
-                    padding: '8px 16px', 
-                    borderRadius: '20px', 
-                    cursor: 'pointer', 
-                    fontWeight: 'bold', 
-                    marginRight: '15px',
-                    boxShadow: '0 2px 4px rgba(168, 85, 247, 0.3)'
-                  }}>
-                  🏢 Panel de Anfitrión
-                </button>
-              )}
               
               <img 
                 src={user.foto_url || `https://ui-avatars.com/api/?name=${user.nombre_completo?.replace(' ', '+')}&background=fff&color=a855f7&rounded=true`} 
@@ -54,10 +35,16 @@ const Header = ({ user, onLogout }) => {
                 className="profile-pic"
                 onClick={() => setMenuAbierto(!menuAbierto)}
               />
-              
               {/* Menú desplegable interactivo */}
               {menuAbierto && (
                 <div className="dropdown-menu">
+ 
+                  {(user.rol === 'arrendador' || user.rol === 'admin') && (
+                    <Link to="/panel-anfitrion" className="dropdown-item" onClick={() => setMenuAbierto(false)}>
+                      Panel de Anfitrión
+                    </Link>
+                  )}
+
                   <Link to="/perfil" className="dropdown-item" onClick={() => setMenuAbierto(false)}>
                     Mi perfil
                   </Link>
@@ -65,7 +52,7 @@ const Header = ({ user, onLogout }) => {
                     className="dropdown-item btn-salir" 
                     onClick={() => {
                       setMenuAbierto(false);
-                      onLogout(); // Llama a la función de App.jsx para limpiar la sesión
+                      onLogout();
                     }}
                   >
                     Cerrar sesión
