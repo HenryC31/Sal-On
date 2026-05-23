@@ -1,30 +1,36 @@
 const express = require('express');
+const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
+
+// 1. Configuración de CORS para evitar errores de bloqueo
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
 app.use(express.json());
 
-// Inicializamos el cliente de Supabase
+// 2. Inicialización de Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
+// Función de router para Sharding
 const obtenerTablaShard = (ciudad) => {
-  if (!ciudad) return 'salones';
-  
-  const ciudadLimpia = ciudad.toLowerCase().trim();
-  
-  if (ciudadLimpia === 'la paz') return 'salones_lapaz';
-  if (ciudadLimpia === 'monterrey') return 'salones_monterrey';
-  if (ciudadLimpia === 'guadalajara') return 'salones_guadalajara';
-  
-  return 'salones'; // Tabla por defecto si es otra ciudad
+    if (!ciudad) return 'salones';
+    const ciudadLimpia = ciudad.toLowerCase().trim();
+    if (ciudadLimpia === 'la paz') return 'salones_lapaz';
+    if (ciudadLimpia === 'monterrey') return 'salones_monterrey';
+    if (ciudadLimpia === 'guadalajara') return 'salones_guadalajara';
+    return 'salones';
 };
 
-// Endpoint para obtener todos los salones
+// --- RUTAS DE SALONES (SHARDING) ---
 app.get('/salones', async (req, res) => {
     try {
-        // Hacemos consultas en paralelo a todas las bases de datos distribuidas (shards)
         const [shardLaPaz, shardMty, shardGdl, shardBase] = await Promise.all([
             supabase.from('salones_lapaz').select('*'),
             supabase.from('salones_monterrey').select('*'),
@@ -32,90 +38,54 @@ app.get('/salones', async (req, res) => {
             supabase.from('salones').select('*')
         ]);
 
-        // Juntamos los fragmentos en un solo arreglo plano
         const catalogoCompleto = [
             ...(shardLaPaz.data || []),
             ...(shardMty.data || []),
             ...(shardGdl.data || []),
             ...(shardBase.data || [])
         ];
-        
         res.json(catalogoCompleto);
     } catch (error) {
         console.error("Error en consulta cross-shard:", error);
-        res.status(500).json({ error: "Error al conectar con los shards de datos" });
+        res.status(500).json({ error: "Error al conectar con los shards" });
     }
 });
 
-// Crear un nuevo salón 
-app.post('/', async (req, res) => {
-  try {
-    const { nombre, direccion, ciudad, descripcion, capacidad_max, precio_evento, amenidades, anfitrion_id, imagenes } = req.body;
-    
-    // El router decide a qué shard pertenece el registro
-    const tablaDestino = obtenerTablaShard(ciudad);
-    console.log(`[SHARDING] Redireccionando inserción a la tabla: ${tablaDestino}`);
-
-    const { data, error } = await supabase
-      .from(tablaDestino)
-      .insert([{ nombre, direccion, ciudad, descripcion, capacidad_max, precio_evento, amenidades, anfitrion_id, imagenes }])
-      .select();
-
-    if (error) throw error;
-
-    res.status(201).json({ mensaje: `¡Salón registrado en shard ${tablaDestino}!`, salon: data[0] });
-  } catch (err) {
-    console.error("Error al crear salón en shard:", err);
-    res.status(500).json({ error: 'No se pudo registrar el salón en el catálogo distribuido.' });
-  }
+// --- RUTAS DE RESEÑAS (CORREGIDAS SEGÚN TU TABLA) ---
+app.get('/api/resenas/:salon_id', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('resenas')
+            .select('*')
+            .eq('salon_id', req.params.salon_id); // Columna corregida
+        
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) { 
+        console.error("Error en GET reseñas:", err);
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
-// Actualizar un salón existente
-app.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nombre, direccion, ciudad, descripcion, capacidad_max, precio_evento, amenidades, imagenes } = req.body;
-    
-    // Buscamos el shard correcto basándonos en la ciudad del salón
-    const tablaDestino = obtenerTablaShard(ciudad);
-    console.log(`[SHARDING] Redireccionando actualización a la tabla: ${tablaDestino}`);
-
-    const { data, error } = await supabase
-      .from(tablaDestino)
-      .update({ nombre, direccion, ciudad, descripcion, capacidad_max, precio_evento, amenidades, imagenes })
-      .eq('id', id)
-      .select();
-
-    if (error) throw error;
-
-    res.status(200).json({ mensaje: 'Salón actualizado en su respectivo shard', salon: data[0] });
-  } catch (err) {
-    console.error("Error al actualizar salón en shard:", err);
-    res.status(500).json({ error: 'No se pudo actualizar el salón.' });
-  }
-});
-
-app.delete('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { ciudad } = req.query;
-    
-    // El router decide a qué shard ir a borrar
-    const tablaDestino = obtenerTablaShard(ciudad);
-    console.log(`[SHARDING] Eliminando salón de la tabla: ${tablaDestino}`);
-
-    const { error } = await supabase
-      .from(tablaDestino)
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-
-    res.status(200).json({ mensaje: 'Salón eliminado correctamente del shard.' });
-  } catch (err) {
-    console.error("Error al eliminar salón en shard:", err);
-    res.status(500).json({ error: 'No se pudo eliminar el salón.' });
-  }
+app.post('/api/resenas', async (req, res) => {
+    try {
+        const { salon_id, id_cliente, calificacion, comentario } = req.body;
+        
+        const { data, error } = await supabase
+            .from('resenas')
+            .insert([{ 
+                "salon_id": salon_id,       // Columna corregida
+                "cliente_id": id_cliente,   // Columna corregida
+                "calificacion": calificacion, 
+                "comentario": comentario 
+            }]);
+        
+        if (error) throw error;
+        res.status(201).json({ mensaje: "Reseña guardada" });
+    } catch (err) { 
+        console.error("Error en POST reseñas:", err);
+        res.status(500).json({ error: err.message }); 
+    }
 });
 
 const PORT = 3001;

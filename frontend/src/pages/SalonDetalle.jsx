@@ -11,6 +11,9 @@ const SalonDetalle = () => {
   const [salon, setSalon] = useState(null);
   const [fecha, setFecha] = useState('');
   const [imgIndex, setImgIndex] = useState(0);
+  
+  const [resenas, setResenas] = useState([]);
+  const [nuevaResena, setNuevaResena] = useState({ calificacion: 5, comentario: '' });
 
   useEffect(() => {
     const fetchSalon = async () => {
@@ -22,7 +25,16 @@ const SalonDetalle = () => {
         console.error("Error trayendo los detalles:", error);
       }
     };
+
+    const fetchResenas = async () => {
+      try {
+        const resp = await axios.get(`http://localhost:3001/api/resenas/${id}`);
+        setResenas(resp.data);
+      } catch (err) { console.error("Error al cargar reseñas", err); }
+    };
+
     fetchSalon();
+    fetchResenas();
   }, [id]);
 
   if (!salon) {
@@ -36,25 +48,16 @@ const SalonDetalle = () => {
   const nextImg = () => setImgIndex((prev) => (prev + 1) % fotos.length);
   const prevImg = () => setImgIndex((prev) => (prev === 0 ? fotos.length - 1 : prev - 1));
 
-const handleReservar = async () => {
+  const handleReservar = async () => {
     const usuarioString = localStorage.getItem('salonUser');
     if (!usuarioString) {
-      Swal.fire({
-        icon: 'warning',
-        title: '¡Alto ahí!',
-        text: 'Necesitas iniciar sesión para poder apartar una fecha.',
-        confirmButtonColor: '#a855f7'
-      }).then(() => navigate('/login'));
+      Swal.fire({ icon: 'warning', title: '¡Alto ahí!', text: 'Inicia sesión para reservar.', confirmButtonColor: '#a855f7' })
+        .then(() => navigate('/login'));
       return;
     }
 
     if (!fecha) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Falta la fecha',
-        text: 'Por favor selecciona el día de tu evento en el calendario.',
-        confirmButtonColor: '#a855f7'
-      });
+      Swal.fire({ icon: 'error', title: 'Falta la fecha', text: 'Selecciona una fecha.', confirmButtonColor: '#a855f7' });
       return;
     }
 
@@ -62,7 +65,6 @@ const handleReservar = async () => {
 
     try {
       Swal.fire({ title: 'Bloqueando fecha...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
       const respuesta = await axios.post('http://localhost:3000/api/reservas', {
         salon_id: salon.id,
         cliente_id: usuarioLogueado.id,
@@ -72,99 +74,40 @@ const handleReservar = async () => {
       });
 
       if (respuesta.status === 201) {
-        const idReserva = respuesta.data.reserva_id;
-
-        const { isConfirmed } = await Swal.fire({
-          title: '💳 Pasarela de Pagos',
-          html: `
-            <div style="text-align: left; margin-bottom: 15px;">
-              <p>Total a pagar: <strong style="font-size: 1.2rem; color: #10b981;">$${salon.precio_evento.toLocaleString('es-MX')} MXN</strong></p>
-            </div>
-            <input id="swal-tarjeta" class="swal2-input" placeholder="Número de Tarjeta (16 dígitos)" type="text" maxlength="16" style="margin-bottom: 10px; width: 85%;">
-            <div style="display: flex; gap: 10px; justify-content: center;">
-              <input id="swal-fecha" class="swal2-input" placeholder="MM/AA" type="text" maxlength="5" style="width: 40%; margin: 0;">
-              <input id="swal-cvv" class="swal2-input" placeholder="CVV" type="password" maxlength="3" style="width: 40%; margin: 0;">
-            </div>
-          `,
-          focusConfirm: false,
-          showCancelButton: true,
-          confirmButtonText: 'Pagar ahora',
-          cancelButtonText: 'Pagar después',
-          confirmButtonColor: '#10b981', // Verde para transmitir seguridad
-          cancelButtonColor: '#6b7280',
-          preConfirm: () => {
-            const tarjeta = document.getElementById('swal-tarjeta').value;
-            if (!tarjeta || tarjeta.length < 16) {
-              Swal.showValidationMessage('Por favor ingresa una tarjeta válida de 16 dígitos');
-              return false;
-            }
-            return true;
-          }
-        });
-
-        // 3. Evaluar qué decidió el usuario
-        if (isConfirmed) {
-          // Simulamos el tiempo que tarda el banco en responder (2 segundos)
-          Swal.fire({ 
-            title: 'Procesando pago...', 
-            text: 'Conectando con el banco, no cierres esta ventana',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading() 
-          });
-          
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          await axios.patch(`http://localhost:3000/api/reservas/${idReserva}/pagar`);
-
-          Swal.fire({
-            icon: 'success',
-            title: '¡Pago Aprobado!',
-            text: 'Tu recibo ha sido generado y la fecha está 100% confirmada.',
-            confirmButtonColor: '#a855f7'
-          }).then(() => navigate('/perfil'));
-
-        } else {
-          // Si le dio a "Cancelar" o cerró el modal, se queda como 'pendiente'
-          Swal.fire({
-            icon: 'info',
-            title: 'Reserva Pendiente',
-            text: 'La fecha está apartada. Tienes 24 horas para realizar el pago desde tu Perfil antes de que se libere el salón.',
-            confirmButtonColor: '#a855f7'
-          }).then(() => navigate('/perfil'));
-        }
+        Swal.fire({ icon: 'success', title: '¡Reserva creada!', confirmButtonColor: '#a855f7' });
       }
     } catch (error) {
-      console.error("Error al reservar:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Fecha no disponible',
-        text: error.response?.data?.error || 'Hubo un problema al procesar la reserva.',
-        confirmButtonColor: '#a855f7'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: error.response?.data?.error || 'Error al reservar', confirmButtonColor: '#a855f7' });
     }
   };
 
-return (
+  const handleEnviarResena = async () => {
+    const user = JSON.parse(localStorage.getItem('salonUser'));
+    if (!user) return Swal.fire('Error', 'Debes iniciar sesión para comentar', 'error');
+
+    try {
+        await axios.post('http://localhost:3001/api/resenas', {
+            salon_id: id,
+            id_cliente: user.id,
+            calificacion: nuevaResena.calificacion,
+            comentario: nuevaResena.comentario
+        });
+        Swal.fire('¡Éxito!', 'Reseña publicada', 'success');
+        window.location.reload(); 
+    } catch (err) {
+        Swal.fire('Error', 'No se pudo publicar la reseña', 'error');
+    }
+  };
+
+  return (
     <div className="detalle-container">
       <div className="detalle-izq">
-        
-        {/* --- NUEVO: Renderizado del Carrusel Visual --- */}
         <div className="carrusel-container">
-          <img src={fotos[imgIndex]} alt={`Foto de ${salon.nombre}`} className="carrusel-img" />
-          
-          {/* Solo mostramos las flechas si hay más de 1 foto */}
+          <img src={fotos[imgIndex]} alt="Carrusel" className="carrusel-img" />
           {fotos.length > 1 && (
             <>
               <button className="carrusel-btn left" onClick={prevImg}>‹</button>
               <button className="carrusel-btn right" onClick={nextImg}>›</button>
-              <div className="carrusel-indicadores">
-                {fotos.map((_, i) => (
-                  <span 
-                    key={i} 
-                    className={`punto ${i === imgIndex ? 'activo' : ''}`} 
-                    onClick={() => setImgIndex(i)}
-                  />
-                ))}
-              </div>
             </>
           )}
         </div>
@@ -177,32 +120,43 @@ return (
           <p><strong>Capacidad máxima:</strong> {salon.capacidad_max} personas.</p>
         </div>
 
-        <h3>Amenidades incluidas</h3>
-        <ul className="amenidades-lista">
-          {salon.amenidades && salon.amenidades.map((amenidad, index) => (
-            <li key={index}>✨ {amenidad}</li>
+        <div className="seccion-reseñas" style={{ marginTop: '40px' }}>
+          <h3>Opiniones de usuarios</h3>
+          {resenas.map(r => (
+            <div key={r.id} style={{ borderBottom: '1px solid #ccc', padding: '10px 0' }}>
+              <p><strong>{r.calificacion}⭐</strong> - {r.comentario}</p>
+            </div>
           ))}
-        </ul>
+          
+          <div className="form-reseña" style={{ marginTop: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Elige tu calificación:</label>
+            <div style={{ fontSize: '30px', cursor: 'pointer', marginBottom: '10px' }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => setNuevaResena({ ...nuevaResena, calificacion: star })}
+                  style={{ color: star <= nuevaResena.calificacion ? '#ffc107' : '#e4e5e9', transition: 'color 0.2s', marginRight: '5px' }}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+            <textarea 
+              placeholder="Escribe tu opinión..." 
+              value={nuevaResena.comentario}
+              onChange={(e) => setNuevaResena({...nuevaResena, comentario: e.target.value})} 
+              style={{ display: 'block', width: '100%', height: '80px', padding: '10px', borderRadius: '5px' }}>
+            </textarea>
+            <button className="btn-confirmar" onClick={handleEnviarResena} style={{ marginTop: '10px' }}>Publicar Reseña</button>
+          </div>
+        </div>
       </div>
 
-      {/*Tarjeta de reservación */}
       <div className="detalle-der">
         <div className="reserva-card">
-          <h2 className="precio-grande">${salon.precio_evento} <span style={{fontSize: '1rem', color: '#666', fontWeight: 'normal'}}>MXN / evento</span></h2>
-          
-          <div className="form-reserva">
-            <label style={{fontWeight: 'bold', color: '#555'}}>Selecciona tu fecha</label>
-            <input 
-              type="date" 
-              className="input-reserva"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-            />
-            
-            <button className="btn-confirmar" onClick={handleReservar}>
-              Confirmar Reservación
-            </button>
-          </div>
+          <h2 className="precio-grande">${salon.precio_evento} <span style={{fontSize: '1rem', color: '#666'}}>MXN</span></h2>
+          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <button className="btn-confirmar" onClick={handleReservar}>Confirmar Reservación</button>
         </div>
       </div>
     </div>
