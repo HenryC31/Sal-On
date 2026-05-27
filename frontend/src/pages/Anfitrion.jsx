@@ -17,7 +17,7 @@ const Anfitrion = () => {
   const [salonEditandoId, setSalonEditandoId] = useState(null);
   const [imagenesExistentes, setImagenesExistentes] = useState([]);
   const [modoOffline, setModoOffline] = useState(false);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false); // Estado para controlar el acordeón
+  const [mostrarFormulario, setMostrarFormulario] = useState(false); 
 
   const opcionesAmenidades = ['Aire libre', 'Alberca', 'Aire acondicionado', 'Asador', 'Área de juegos'];
   
@@ -90,6 +90,32 @@ const Anfitrion = () => {
     cargarDatos();
   }, [usuario]);
 
+  // Intentamos sincronizar con el servidor cada vez que se monta el componente, por si el modo offline se activó en una sesión anterior
+  useEffect(() => {
+    const intentarSincronizar = async () => {
+      const pendientes = await db.sync_queue.toArray();
+      if (pendientes.length === 0) return; 
+
+      try {
+        // Hacemos un "Ping" para ver si el servidor ya revivió
+        await axios.get('http://localhost:3000/api/salones');
+        
+        // Si no lanza error, procesamos la cola pendiente
+        for (const tarea of pendientes) {
+          await axios({ method: tarea.metodo, url: tarea.url, data: tarea.datos });
+          await db.sync_queue.delete(tarea.id); 
+        }
+        
+        Swal.fire({ icon: 'success', title: '¡Sincronizado!', text: 'Se conectó con el servidor y se aplicaron tus cambios pendientes.', toast: true, position: 'top-end', timer: 4000 });
+      } catch  {
+        // Si sigue sin conexión, dejamos todo en la cola y esperamos al próximo intento
+        console.warn("El servidor sigue inaccesible. Conservando datos en caché local.");
+      }
+    };
+
+    intentarSincronizar();
+  }, []);
+
   const handleInputChange = (e) => {
     setFormSalon({ ...formSalon, [e.target.name]: e.target.value });
   };
@@ -143,7 +169,7 @@ const Anfitrion = () => {
     setImagenesExistentes(imagenesExistentes.filter(url => url !== urlEliminar));
   };
 
-  const handleRegistrarSalon = async (e) => {
+const handleRegistrarSalon = async (e) => {
     e.preventDefault();
     
     if (!modoEdicion && archivos.length === 0) {
@@ -170,18 +196,43 @@ const Anfitrion = () => {
       }
 
       if (modoEdicion) {
-        const respuesta = await axios.put(`http://localhost:3000/api/salones/${salonEditandoId}`, {
+        const datosActualizados = {
           ...formSalon,
           capacidad_max: Number(formSalon.capacidad_max),
           precio_evento: Number(formSalon.precio_evento),
           imagenes: [...imagenesExistentes, ...linksImagenes]
-        });
+        };
 
-        if (respuesta.status === 200) {
+        try {
+          // Intentamos actualizar directamente al servidor
+          const respuesta = await axios.put(`http://localhost:3000/api/salones/${salonEditandoId}`, datosActualizados);
+          
+          // Si el servidor responde bien:
           setMisSalones(misSalones.map(s => s.id === salonEditandoId ? respuesta.data.salon : s));
+          await db.salones.put(respuesta.data.salon); // Actualiza caché
           cancelarEdicion();
-          setArchivos([]);
-          Swal.fire({ icon: 'success', title: 'Actualizado', text: 'Tus cambios e imágenes se han guardado.' });
+          Swal.fire({ icon: 'success', title: 'Actualizado', text: 'Tus cambios e imágenes se han guardado en el sistema distribuido.' });
+          
+        } catch (error) {
+          if (error.code === 'ERR_NETWORK' || !error.response || error.response.status >= 500) {
+            await db.sync_queue.add({
+              tipo: 'EDITAR_SALON',
+              url: `http://localhost:3000/api/salones/${salonEditandoId}`,
+              metodo: 'PUT',
+              datos: datosActualizados
+            });
+
+            // Actualizamos la vista local
+            await db.salones.put({ id: salonEditandoId, ...datosActualizados });
+            setMisSalones(misSalones.map(s => s.id === salonEditandoId ? { ...s, ...datosActualizados } : s));
+            
+            cancelarEdicion();
+            Swal.fire({ icon: 'warning', title: 'Servidor No Disponible', text: 'Se guardó localmente. Sincronizaremos cuando el sistema vuelva a estar en línea.' });
+
+          } else {
+            console.error(error);
+            Swal.fire('Error', 'No se pudieron guardar los cambios. Revisa los datos.', 'error');
+          }
         }
       } else {
         const nuevoSalon = {
@@ -246,7 +297,7 @@ const Anfitrion = () => {
 
       {modoOffline && (
         <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '10px', textAlign: 'center', borderRadius: '8px', marginBottom: '15px', fontWeight: 'bold' }}>
-          ⚠️ MODO OFFLINE ACTIVADO: Viendo caché local. Las funciones de edición están pausadas.
+          ⚠️ MODO OFFLINE ACTIVADO: Cualquier cambio será guardado localmente y actualizado cuando se restablezca la conexión.
         </div>
       )}
       

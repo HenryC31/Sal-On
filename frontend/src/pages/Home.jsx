@@ -8,6 +8,7 @@ import { db } from '../localDb';
 
 const Home = () => {
   const [salones, setSalones] = useState([]);
+  const [reservasActivas, setReservasActivas] = useState([]);
   const [busqueda, setBusqueda] = useState(''); 
   const [modoOffline, setModoOffline] = useState(false);
   const [filtrosActivos, setFiltrosActivos] = useState({
@@ -18,35 +19,39 @@ const Home = () => {
   });
 
   useEffect(() => {
-    const fetchSalones = async () => {
-      let datosServer = null;
+    const fetchSalonesYReservas = async () => {
+      let datosServer;
 
-      // 1. Intentamos consultar al servidor (Líder)
       try {
-        const respuesta = await axios.get('http://localhost:3000/api/salones');
-        datosServer = respuesta.data;
+        // Pedimos al mismo tiempo los salones y las fechas ocupadas
+        const [resSalones, resReservas] = await Promise.all([
+          axios.get('http://localhost:3000/api/salones'),
+          axios.get('http://localhost:3000/api/reservas')
+        ]);
+        
+        datosServer = resSalones.data;
         setSalones(datosServer);
+        setReservasActivas(resReservas.data); 
         setModoOffline(false);
+
+        const datosLimpios = datosServer.filter(salon => salon && salon.id);
+        await db.salones.bulkPut(datosLimpios);
+
       } catch (errorRed) {
         console.error("Error conectando al Gateway:", errorRed);
-        // Falló el servidor, leemos del Seguidor (IndexedDB)
         setModoOffline(true);
         const salonesLocales = await db.salones.toArray();
         setSalones(salonesLocales);
         
         Swal.fire({
-          icon: 'warning',
-          title: 'Conexión Perdida',
+          icon: 'warning', title: 'Conexión Perdida',
           text: 'El servidor principal está caído. Estás viendo una copia local de solo lectura.',
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 4000
+          toast: true, position: 'top-end', showConfirmButton: false, timer: 4000
         });
-        return; // Salimos para no ejecutar Dexie
+        return;
       }
 
-      // 2. Si el servidor respondió, actualizamos la réplica local (Seguidor)
+
       if (datosServer) {
         try {
           const datosLimpios = datosServer.filter(salon => salon && salon.id);
@@ -57,7 +62,7 @@ const Home = () => {
       }
     };
     
-    fetchSalones();
+    fetchSalonesYReservas();
   }, []);
 
   const aplicarFiltros = (nuevosFiltros) => {
@@ -75,17 +80,33 @@ const Home = () => {
     const cumpleAmenidades = filtrosActivos.amenidades.length === 0 || 
       filtrosActivos.amenidades.every(amenidad => salon.amenidades && salon.amenidades.includes(amenidad));
 
-    return cumpleBusqueda && cumplePrecio && cumplePersonas && cumpleAmenidades;
+      let cumpleFecha = true;
+        if (filtrosActivos.fecha) {
+          const fechaFiltroStr = filtrosActivos.fecha;
+  
+          const estaOcupado = reservasActivas.some(r => {
+            const fechaBD = r.fecha_evento.split('T')[0];
+            return r.salon_id === salon.id && fechaBD === fechaFiltroStr;
+         });
+
+          cumpleFecha = !estaOcupado;
+        }
+        return cumpleBusqueda && cumplePrecio && cumplePersonas && cumpleAmenidades && cumpleFecha;
   }).sort((a, b) => {
-    // MAGIA DE GEOLOCALIZACIÓN SIMULADA
-    if (a.ciudad === CIUDAD_SIMULADA && b.ciudad !== CIUDAD_SIMULADA) return -1;
-    if (a.ciudad !== CIUDAD_SIMULADA && b.ciudad === CIUDAD_SIMULADA) return 1;
-    return 0; 
+    const esLocalA = a.ciudad === CIUDAD_SIMULADA ? 1 : 0;
+    const esLocalB = b.ciudad === CIUDAD_SIMULADA ? 1 : 0;
+    
+    if (esLocalA !== esLocalB) {
+      return esLocalB - esLocalA; 
+    }
+
+    const ratingA = a.promedio_calificacion || 0;
+    const ratingB = b.promedio_calificacion || 0;
+    return ratingB - ratingA;
   });
 
   return (
     <div className="container">
-      {/* --- BANNER DE MODO OFFLINE --- */}
       {modoOffline && (
         <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '10px', textAlign: 'center', borderRadius: '8px', marginBottom: '15px', fontWeight: 'bold' }}>
           ⚠️ MODO OFFLINE ACTIVADO: Sistema trabajando con réplica local (Solo Lectura). Las reservaciones están pausadas.

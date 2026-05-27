@@ -18,11 +18,9 @@ app.post('/registro', async (req, res) => {
   try {
     const { nombre_completo, telefono, correo, password, rol } = req.body;
 
-    //Encriptar la contraseña
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    //Insertar en la base de datos de Supabase
     const { data, error } = await supabase
       .from('usuarios')
       .insert([
@@ -37,7 +35,6 @@ app.post('/registro', async (req, res) => {
 
     if (error) {
       console.error("Error de Supabase:", error);
-      // Si el código es 23505, significa que el correo ya existe
       if (error.code === '23505') {
         return res.status(400).json({ error: 'El correo ya está registrado.' });
       }
@@ -57,26 +54,22 @@ app.post('/login', async (req, res) => {
   try {
     const { correo, password } = req.body;
 
-    // Buscar al usuario por correo en Supabase
     const { data: usuario, error } = await supabase
       .from('usuarios')
       .select('*')
       .eq('correo', correo)
-      .single(); // single() porque el correo es UNIQUE
+      .single();
 
-    // Si hay error o no encuentra al usuario
     if (error || !usuario) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos.' });
     }
 
-    // Comparar la contraseña ingresada con el Hash guardado
     const passwordValida = await bcrypt.compare(password, usuario.password_hash);
     
     if (!passwordValida) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos.' });
     }
 
-    // Login exitoso: Quitamos el password_hash por seguridad antes de mandar los datos al Front
     delete usuario.password_hash;
     
     res.status(200).json({ 
@@ -90,27 +83,41 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Actualizar datos del perfil
+// Actualizar datos del perfil (¡CORREGIDO Y OPTIMIZADO!)
 app.put('/actualizar', async (req, res) => {
   try {
-    const { id, correo, telefono, foto_url } = req.body;
+    const { id, nombre_completo, correo, telefono, foto_url, password } = req.body;
+
+    // Creamos el payload base con los datos limpios
+    const camposActualizar = { 
+      nombre_completo, 
+      correo, 
+      telefono, 
+      foto_url 
+    };
+
+    // Si el usuario ingresó una nueva contraseña desde el Front, la encriptamos antes de subirla
+    if (password && password.trim() !== '') {
+      const salt = await bcrypt.genSalt(10);
+      camposActualizar.password_hash = await bcrypt.hash(password, salt);
+    }
 
     const { data, error } = await supabase
       .from('usuarios')
-      .update({ correo, telefono, foto_url })
-      .eq('id', id) // Buscamos al usuario por su ID único
-      .select() // Para que nos regrese el usuario actualizado
-      .single(); // single() porque solo actualizamos un usuario
+      .update(camposActualizar)
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) {
       if (error.code === '23505') return res.status(400).json({ error: 'El correo ya está en uso.' });
       throw error;
     }
 
-    delete data.password_hash; // Por seguridad, no mandamos el hash de vuelta al Front
+    delete data.password_hash; // Seguridad: no devolvemos el hash
     res.status(200).json({ mensaje: 'Perfil actualizado', usuario: data });
   } catch (err) {
-    console.error(err);
+    console.error("Error al actualizar perfil:", err);
     res.status(500).json({ error: 'Error al actualizar perfil' });
   }
 });

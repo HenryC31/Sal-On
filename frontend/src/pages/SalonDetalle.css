@@ -157,6 +157,50 @@
   border-color: #a855f7;
 }
 
+/* --- ESTILOS PREMIUM PARA EL CALENDARIO --- */
+.react-datepicker {
+  border: none !important;
+  font-family: inherit !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-radius: 15px !important;
+  overflow: hidden;
+}
+
+.react-datepicker__header {
+  background-color: #f3e8ff !important;
+  border-bottom: none !important;
+  padding-top: 15px !important;
+}
+
+.react-datepicker__current-month, 
+.react-datepicker__day-name {
+  color: #a855f7 !important;
+  font-weight: bold !important;
+  text-transform: capitalize;
+}
+
+.react-datepicker__day {
+  margin: 0.2rem !important;
+  border-radius: 50% !important;
+  transition: all 0.2s;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e0d4fc !important;
+}
+
+.react-datepicker__day--selected, 
+.react-datepicker__day--keyboard-selected {
+  background-color: #a855f7 !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+.react-datepicker__day--disabled {
+  color: #ccc !important;
+  text-decoration: line-through;
+}
+
 .btn-confirmar {
   background: #a855f7;
   color: white;

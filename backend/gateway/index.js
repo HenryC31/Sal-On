@@ -72,6 +72,30 @@ app.put('/api/salones/:id', async (req, res) => {
     }
 });
 
+app.use('/api/resenas', async (req, res) => {
+  try {
+    const response = await axios({
+      method: req.method,
+      url: `http://localhost:3001/api/resenas${req.url}`,
+      data: req.body,
+      headers: req.headers
+    });
+    res.status(response.status).json(response.data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error en Gateway Reseñas' });
+  }
+});
+
+app.delete('/api/salones/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const response = await axios.delete(`http://localhost:3001/${id}`, { params: req.query });
+        res.status(response.status).json(response.data);
+    } catch (error) {
+        res.status(error.response?.status || 500).json(error.response?.data || { error: 'Error eliminando salón' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Gateway corriendo en http://localhost:${PORT}`);
 });

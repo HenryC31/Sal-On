@@ -15,7 +15,33 @@ const SalonCard = ({ salon }) => {
         <p className="salon-location">📍 {salon.ciudad}</p>
         <div className="salon-stats">
           <span>👥 {salon.capacidad_max} personas</span>
-          <span className="salon-rating">⭐⭐⭐⭐⭐</span>
+          <div style={{ margin: '10px 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            {salon.promedio_calificacion > 0 ? (
+              <>
+                <div style={{ color: '#ffc107', fontSize: '1.1rem' }}>
+                  {'★'.repeat(Math.round(salon.promedio_calificacion))}
+                  <span style={{ color: '#e5e7eb' }}>
+                    {'★'.repeat(5 - Math.round(salon.promedio_calificacion))}
+                  </span>
+                </div>
+                <strong style={{ fontSize: '0.9rem', color: '#333' }}>
+                  {salon.promedio_calificacion}
+                </strong>
+                <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                  ({salon.total_resenas} {salon.total_resenas === 1 ? 'reseña' : 'reseñas'})
+                </span>
+              </>
+            ) : (
+              <>
+                <div style={{ color: '#e5e7eb', fontSize: '1.1rem' }}>
+                  {'★'.repeat(5)} {/* 5 estrellas grises/apagadas */}
+                </div>
+                <span style={{ fontSize: '0.8rem', color: '#9ca3af', fontStyle: 'italic' }}>
+                  Sin calificaciones aún
+                </span>
+              </>
+            )}
+          </div>
         </div>
         <p className="salon-price">${salon.precio_evento} MXN / evento</p>
     
