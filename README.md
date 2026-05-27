@@ -60,14 +60,14 @@ Debes instalar las dependencias en cada carpeta, ya que cada servicio es indepen
 
 Frontend:
 
-Abre una terminal diferente en la ruta /frontend y ejecuta:
+Abre una terminal en la ruta /frontend y ejecuta:
 ```
 npm install
 ```
 
 Backend:
 
-Abre una terminal en la ruta /backend y ejecuta:
+Abre una terminal diferente en la ruta /backend y ejecuta:
 ```
 npm run install:all
 ```
