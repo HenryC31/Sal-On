@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # Contenedor que agrupa los 4 servicios del backend (Gateway, Usuarios, Reservas, Catálogo)
+  backend-apps:
+    build: ./backend
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
+    environment:
+      # Cadena de conexión distribuida para 5 bases de datos de AWS
+      - MONGO_URI=mongodb://172.31.0.101:27017,172.31.0.102:27017,172.31.0.103:27017,172.31.0.104:27017,172.31.0.105:27017/salon?replicaSet=rs0
+
+  # Contenedor de la interfaz de usuario en React
+  frontend-app:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend-apps
